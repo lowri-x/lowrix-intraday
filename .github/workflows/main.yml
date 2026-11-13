@@ -1,0 +1,32 @@
+name: Arjun Intraday Cash Scanner
+
+on:
+  schedule:
+    # 🚀 9:00 AM IST = 3:30 AM UTC (ਸਿਰਫ਼ ਇੱਕ ਵਾਰ ਚੱਲੇਗਾ ਅਤੇ ਆਪਣੇ ਆਪ ਲੂਪ ਚਲਾਏਗਾ)
+    - cron: '30 3 * * 1-5'
+  workflow_dispatch:
+
+concurrency:
+  group: arjun-intraday-group
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350 # 6 ਘੰਟੇ ਦੀ ਲਿਮਿਟ ਤੋਂ ਬਚਣ ਲਈ
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install yfinance pandas numpy requests
+      - name: Run Intraday Scanner
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+        run: python -u intraday_cash.py
